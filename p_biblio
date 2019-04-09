@@ -1,0 +1,305 @@
+                        ADS
+                        
+with p_esiut; use p_esiut;
+with p_esiut; use p_esiut;
+
+package p_biblio is
+
+	subtype String20  is string(1..20);
+	subtype String100 is string(1..100);
+
+	TITREVIDE : constant string100 := (others => ' '); -- titre "vide"
+
+	type TR_Biblio is
+	  record 
+		 Auteur : String20;   -- Auteur de l'oeuvre
+		 Annee : integer;     -- Annee de publication
+		 Titre : String100;   -- Titre de l'oeuvre
+	end record;
+
+	------------------------------------------------------------------------------------------
+	-- Affichage d'une référence bibliographique
+	-- NE PAS MODIFIER
+	------------------------------------------------------------------------------------------
+	procedure Afficherbiblio(Ref : in TR_Biblio) ;
+	-- {} => {Affiche l'auteur, l'annee de publication et le titre de Ref}
+
+	------------------------------------------------------------------------------------------
+	-- Types, fonctions et procédures utiles pour la PARTIE 2 et les suivantes
+	-- NE PAS MODIFIER !!!
+	------------------------------------------------------------------------------------------
+	function Taille return natural;
+	-- donne la taille du vecteur
+
+	Type TV_Biblio is array (integer range <>) of TR_Biblio;
+
+	procedure Lirevect(Vect : out TV_Biblio);
+	--{} => {le vecteur Vect est rempli par les references lues dans le fichier de données
+	--      /users/info/pub/1a/M1102/tp07/les_biblio
+	--   Vect est trie sur l'annee de publication, puis sur le nom de l'auteur des references}
+
+	--_________________
+	
+	--  A COMPLETER
+    --_________________
+
+    function Egalite(Ref1   , Ref2    : in TR_Biblio) return boolean;
+    --{} => {résultat = vrai si les années de Ref1 et Ref2 sont égales ainsi que les  --  auteurs de Ref1 et Ref2}    
+
+    
+    
+    function InfStrict(Ref1, Ref2 : in TR_Biblio) return boolean;
+    --{} => {résultat = vrai si Ref1 strictement inférieure à Ref2 selon l?ordre défini
+
+
+    function VerifTri (Vect : in TV_biblio) return boolean;
+        -- {} => {résultat = vrai si Vect est trié au sens large selon l?ordre défini} 
+	
+
+    function RechSeqT(Vect : in TV_biblio;  An : in Integer;  Aut : in String20) return integer;
+    -- {Vect trié selon l?ordre (année, auteur)} => { résultat = indice dans Vect du 1er élément d?année an et d?auteur aut, résultat = Vect?last + 1 si non trouvé ; LA RECHERCHE EST SEQUENTIELLE
+    
+
+    function RechDicho(Vect : in TV_Biblio; An : in Integer;  Auteur : in String20) return integer ;
+    -- {Vect trié selon l?ordre (année, auteur)} =>  
+    --{résultat = indice dans Vect du 1er élément d?année an et d?auteur aut, 
+    -- résultat = Vect?last + 1 si non trouvé ; LA RECHERCHE EST DICHOTOMIQUE} 
+
+    
+    ----------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------  ADB  -----------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------
+    
+    
+    
+    
+    
+    with direct_io; -- ne pas supprimer cette ligne !!!
+
+package body p_biblio is
+
+	------------------------------------------------------------------------------------------
+	-- Affichage d'une référence bibliographique
+	-- NE PAS MODIFIER
+	------------------------------------------------------------------------------------------
+	procedure Afficherbiblio(Ref : in TR_Biblio) is
+	-- {} => {Affiche l'auteur, l'annee de publication et le titre de Ref}
+	begin
+		Ecrire_Ligne("Auteur : " & Ref.Auteur);
+		Ecrire_Ligne("Annee : " & Image(Ref.Annee));
+		Ecrire_ligne("Titre : " & Ref.Titre);
+	end Afficherbiblio;
+
+	------------------------------------------------------------------------------------------
+	-- Types, fonctions et procédures utiles pour la PARTIE 2 et les suivantes
+	-- NE PAS MODIFIER !!!
+	------------------------------------------------------------------------------------------
+	package p_biblio_io is new direct_io(TR_Biblio); use p_biblio_io;
+
+	f : file_type;
+
+	function Taille return natural is
+		Taille_fich : natural;
+	begin
+		open(f, in_file,"/users/info/pub/1a/M1102/tp07/les_biblio");
+		taille_fich := natural(size(f));
+		close(f);
+		return Taille_fich;
+	end Taille;
+
+	procedure Lirevect(Vect : out TV_Biblio) is
+	--{} => {le vecteur Vect est rempli par les references lues dans le fichier de donnees
+	--      /users/info/pub/1a/M1102/tp07/les_biblio
+	--   Vect est trie sur l'annee de publication, puis sur le nom de l'auteur des references}
+	begin
+	  open(f, in_file,"/users/info/pub/1a/M1102/tp07/les_biblio");
+	  for J in Vect'range loop
+		  read(f,Vect(J));
+	  end loop;
+	  close(f);
+	end Lirevect;
+
+	------------------------------------------------------------------------------------------																				
+	--_________________
+	
+	--  A COMPLETER
+    --_________________
+
+
+    function Egalite(Ref1   , Ref2    : in TR_Biblio) return boolean is
+    --{} => {résultat = vrai si les années de Ref1 et Ref2 sont égales ainsi que les auteurs de Ref1 et Ref2}
+    begin 
+        if (Ref2.Annee = Ref1.Annee) and (Ref2.Auteur = Ref1.Auteur) then
+            return True;
+        else
+            return false;
+        end if;
+    end Egalite;
+    
+    function InfStrict(Ref1, Ref2 : in TR_Biblio) return boolean is
+    --{} => {résultat = vrai si Ref1 strictement inférieure à Ref2 selon l?ordre défini
+    begin
+        if ( Ref1.Annee < Ref2.annee ) or ( Ref1.Annee = Ref2.Annee and Ref1.Auteur < Ref2.Auteur ) then
+            return true;
+        else 
+            return false;
+        end if;
+    end InfStrict;
+
+
+    function VerifTri (Vect : in TV_biblio) return boolean is
+        -- {} => {résultat = vrai si Vect est trié au sens large selon l?ordre défini} 
+        i : integer := Vect'First+1;
+    begin
+
+        
+        while i < Vect'last+1 and then ( InfStrict( Vect(i-1), Vect(i) ) or else Egalite( Vect(i-1), Vect(i) ) )   loop
+            i := i+1;
+        end loop;
+
+        if i = Vect'last+1 then
+            return true;
+        else 
+            return false;
+        end if;
+
+    end VerifTri;
+
+
+        function RechSeqT(Vect : in TV_biblio;  An : in Integer;  Aut : in String20) return integer is
+            -- {Vect trié selon l?ordre (année, auteur)} => 
+            --{ résultat = indice dans Vect du 1er élément d?année an et d?auteur aut, 
+            --  résultat = Vect?last + 1 si non trouvé ; LA RECHERCHE EST SEQUENTIELLE
+            i : integer;
+            Ref : TR_Biblio ;
+            Tit : string := TITREVIDE ;
+        begin
+            i := Vect'first;
+            Ref := (Aut,An,Tit);
+             
+            while i <= Vect'last and then InfStrict(Vect(i), Ref) loop
+                i := i+1;
+            end loop;
+
+            if Egalite(Vect(i), Ref) then 
+                return i;
+            
+            elsif i = Vect'last+1 then 
+                return i;
+
+                
+            else
+                return Vect'last+1;
+            end if;
+            
+        end RechSeqT;
+        
+
+
+        function RechDicho(Vect : in TV_Biblio; An : in Integer;  Auteur : in String20) return integer is
+        -- {Vect trié selon l?ordre (année, auteur)} =>  
+        --{résultat = indice dans Vect du 1er élément d?année an et d?auteur aut, 
+        -- résultat = Vect?last + 1 si non trouvé ; LA RECHERCHE EST DICHOTOMIQUE} 
+            
+            sup , inf, m : integer;
+            val : TR_Biblio := (Auteur,An,TITREVIDE);
+        begin
+            if val.Annee > vect(Vect'last).Annee then 
+                return Vect'last + 1 ;
+            else
+                sup := vect'last ; inf := vect'first;
+            end if;
+            
+            while inf < sup loop
+                m := (sup+inf)/2;
+                if InfStrict(val,vect(m)) then
+                    sup := m;
+                else 
+                    inf := m+1;
+                end if;
+            end loop;
+            if Egalite(val,vect(sup)) then 
+                return  sup;
+            else
+                return vect'last+1;
+            end if;
+                    
+        end RechDicho;
+        
+
+
+
+ 
+
+end p_biblio;
+
+
+
+
+    ----------------------------------------------------------------------------------------------------------------
+    ------------------------------------------  Prog Principal  ----------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------
+    
+    PROG2
+    
+    with p_esiut; use p_esiut;
+with p_biblio; use p_biblio;
+
+procedure prog2 is 
+
+    V : TV_Biblio(1..Taille) ;
+    Aut: String20;
+    Annee : integer ; 
+    
+
+begin
+    LireVect(V);
+
+
+    ecrire(" Vecteur trié ? ");
+    
+    if VerifTri(v) then
+        ecrire_ligne("yep");
+    else 
+        ecrire_ligne("nope");
+    end if;
+
+    --------------------------------------------------------
+    
+    ecrire("Donnez le nom de l'auteur : ");lire(aut);
+    ecrire("En quelle année : "); lire (annee);
+    
+    -----------------Recherche Sequentielle----------------
+    A_la_ligne;
+    ecrire_ligne("Recherche Sequentielle :");
+    A_la_ligne;
+    
+    if RechSeqT(v,annee,aut) = V'last+1 then
+        ecrire("Cet auteur n'a pas ecrit de livre cette année.");
+    else
+        afficherbiblio(v(RechseqT(v,annee,aut)));
+        ecrire("Ce reference est en ");ecrire(RechseqT(v,annee,aut));ecrire_ligne("e position.");
+    end if;
+    
+    A_la_ligne;
+
+    ---------------Recherche Dichotomique------------------
+    A_la_ligne;
+    ecrire_ligne("Recherche Dichotomique :");
+    A_la_ligne;
+
+    
+     if RechDicho(v,annee,aut) = V'last+1 then
+        ecrire("Cet auteur n'a pas ecrit de livre cette année. ");
+    else
+        afficherbiblio(v(RechDicho(v,annee,aut)));
+        ecrire("Ce reference est en ");ecrire(RechDicho(v,annee,aut));ecrire_ligne("e position.");
+    end if;
+
+    A_la_ligne;
+
+
+    
+end prog2;
+
+    
